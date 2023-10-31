@@ -44,8 +44,14 @@ export default function Navbar() {
                                 session?.user?.email
                             }
                         </div>
-                        <Link href={'/dashboard'}>Dashboard</Link>
-                        <Link href={'/create-post'}>Create post</Link>
+                        <Link
+                        onClick={()=>setIsPopupVisible(false)}
+                        className='hover:underline'
+                         href={'/dashboard'}>Dashboard</Link>
+                        <Link 
+                         onClick={()=>setIsPopupVisible(false)}
+                        className='hover:underline' 
+                        href={'/create-post'}>Create post</Link>
                         <button className='btn' onClick={()=>signOut()}>Sign Out</button>
                     </div>
                     <div className='flex gap-2 items-center'>

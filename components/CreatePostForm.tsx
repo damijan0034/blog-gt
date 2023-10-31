@@ -1,13 +1,34 @@
 "use client"
 
+import { TCategory } from "@/app/types"
 import { categoriesData } from "@/data"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 
 export default function CreatePostForm()  {
     const [links,setLinks]=useState<string[]>([])
     const [linkInput,setLinkInput]=useState("")
+    const[title,setTitle]=useState("")
+    const[content,setContent]=useState("")
+    const[categories,setCategories]=useState<TCategory[]>([])
+    const[selectedCategory,setSelectedCategory]=useState("")
+    const[imgUrl,setImgUrl]=useState("")
+    const[publicId,setPublicId]=useState("")
+    const[error,setError]=useState("")
+
+    const router=useRouter()
+
+    useEffect(()=>{
+        const fetchAllCategories=async()=>{
+            const res=await fetch("/api/categories")
+            const catNames=await res.json()
+
+            setCategories(catNames)
+        }
+        fetchAllCategories()
+    },[])
 
     const addLink=(e:React.MouseEvent<HTMLButtonElement,MouseEvent>)=>{
         e.preventDefault();
@@ -19,12 +40,47 @@ export default function CreatePostForm()  {
     const deleteLink=(index :number)=>{
         setLinks((prev)=>prev.filter((_,i)=> i !==index))
     }
+
+    const handleSubmit=async(e: React.FormEvent)=>{
+        e.preventDefault() 
+        
+        if(!title || !content){
+            setError("Title and content are required")
+            return;
+        }
+
+        try {
+            const res=await fetch("api/posts/",{
+               method:"POST" ,
+               headers:{
+                "Content-type":"aplication/json"
+               },
+               body:JSON.stringify({
+                title,
+                content,
+                links,
+                selectedCategory,
+                imgUrl,
+                publicId
+               })
+
+               
+            })
+         
+        if(res.ok){
+            router.push("/dashboard")
+        }
+    }
+        catch (error) {
+            console.log(error)
+        }
+    }
   return (
     <div>
         <h4>Create Post</h4>
-        <form  className="flex flex-col gap-2"> 
-            <input type="text" placeholder='title' />
-            <textarea placeholder='content'></textarea>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2"> 
+            <input onChange={(e)=>setTitle(e.target.value)} type="text" placeholder='title' />
+            <textarea onChange={(e)=>setContent(e.target.value)}  placeholder='content'></textarea>
             {
                 links && links.map((link,i)=>(
                     <div key={i} className="flex gap-4 items-center">
@@ -63,18 +119,22 @@ export default function CreatePostForm()  {
                     Add
                     </button>
             </div>
-            <select className="p-4 rounded-md border appearance-none" >
+            <select onChange={(e)=>setSelectedCategory(e.target.value)} className="p-4 rounded-md border appearance-none" >
                 <option value="">Select a category</option>
                 {
-                    categoriesData && 
-                        categoriesData.map((category)=>(
-                            <option key={category.id} value={category.name}>{category.name}</option>
+                    categories && 
+                        categories.map((category)=>(
+                            <option key={category.id} value={category.catName}>{category.catName}</option>
                         ))
                     
                 }
             </select>
             <button type="submit" className="primary-btn">Create post</button>
-            <div className="p-4 text-red-500 font-bold">Error message</div>
+            {
+                error &&
+                (<div className="p-4 text-red-500 font-bold">{error}</div>)
+            }
+            
         </form>
         </div>
   )

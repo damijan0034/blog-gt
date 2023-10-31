@@ -2,6 +2,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import DeleteButton from './DeleteButton';
+import { GetServerSideProps } from 'next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth';
 
 interface PostProps{
     id:string,
@@ -16,7 +19,7 @@ interface PostProps{
 
 }
 
-export default function Post({
+export default async function Post({
     id,
     author,
     date,
@@ -29,7 +32,13 @@ export default function Post({
 
 
 }:PostProps) {
-    const isEditable=true;
+    const session=await getServerSession(authOptions)
+
+    const isEditable=
+        session && session?.user?.email === authorEmail
+    
+
+    
 
   return (
     <div className='my-4 py-7 border-b border-b-slate-300'>
@@ -83,7 +92,7 @@ export default function Post({
                     px-4 py-2 bg-slate-200 rounded-md w-fit
                 '>
                        <Link href={`/edit-post/${id}`}>Edit</Link>
-                       <DeleteButton /> 
+                       <DeleteButton id={id} /> 
                 </div>
                 
             )
