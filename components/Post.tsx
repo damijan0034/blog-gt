@@ -43,7 +43,19 @@ export default async function Post({
   return (
     <div className='my-4 py-7 border-b border-b-slate-300'>
         <div className='mb-4'>
-        Posted by <span className='font-bold'>{author}</span>  on {date}
+            {author ?(
+                <>
+                     Posted by <span className='font-bold'>{author}</span>  on {date}
+                </>
+            ) :
+            (
+                <>
+                     Posted  on {date}
+                </>
+            )
+                
+            }
+       
         </div>
         <div className='w-full h-72 relative'>
             {thumbnail ? (

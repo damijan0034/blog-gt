@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import Footer from '@/components/Footer'
 import { NextAuthProvider } from '@/components/Providers'
+import { Toaster } from 'react-hot-toast'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -30,7 +31,7 @@ export default function RootLayout({
           
             <Footer />
           </div>
-        
+        <Toaster />
         </NextAuthProvider>
        
         </body>

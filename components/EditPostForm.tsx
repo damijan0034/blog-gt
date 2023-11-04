@@ -1,6 +1,6 @@
 "use client"
 
-import { TCategory } from "@/app/types"
+import { TCategory, TPost } from "@/app/types"
 import { categoriesData } from "@/data"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -10,7 +10,7 @@ import Image from "next/image"
 import toast from "react-hot-toast"
 
 
-export default function CreatePostForm()  {
+export default function EditPostForm({post}:{post:TPost})  {
     const [links,setLinks]=useState<string[]>([])
     const [linkInput,setLinkInput]=useState("")
     const[title,setTitle]=useState("")
@@ -31,7 +31,28 @@ export default function CreatePostForm()  {
             setCategories(catNames)
         }
         fetchAllCategories()
-    },[])
+
+        const initValues=()=>{
+            setTitle(post.title)
+            setContent(post.content)
+            setImgUrl(post.imgUrl || "")
+            setPublicId(post.publicId || "")
+            setSelectedCategory(post.catName || "")
+            setLinks(post.links || [])
+        }
+        initValues();
+    },[post.title,post.content,post.imgUrl,post.publicId,post.catName,post.links])
+
+    const addLink=(e:React.MouseEvent<HTMLButtonElement,MouseEvent>)=>{
+        e.preventDefault();
+        if(linkInput.trim() !== ""){
+            setLinks(prev=>[...prev,linkInput])
+            setLinkInput("");
+        }
+    }
+    const deleteLink=(index :number)=>{
+        setLinks((prev)=>prev.filter((_,i)=> i !==index))
+    }
 
     const handleImageUpload=(result:CldUploadWidgetResults)=>{
         console.log(result)
@@ -45,51 +66,39 @@ export default function CreatePostForm()  {
         }
     }
 
-    const addLink=(e:React.MouseEvent<HTMLButtonElement,MouseEvent>)=>{
-        e.preventDefault();
-        if(linkInput.trim() !== ""){
-            setLinks(prev=>[...prev,linkInput])
-            setLinkInput("");
-        }
-    }
-    const deleteLink=(index :number)=>{
-        setLinks((prev)=>prev.filter((_,i)=> i !==index))
-    }
-
     const removeImage=async(e: React.FormEvent)=>{
-            e.preventDefault()
-            try {
-                const res=await fetch("/api/removeImage",{
-                    method:"POST",
-                    headers:{
-                        "Content-Type":"aplication/json"
-                    },
-                    body:JSON.stringify({publicId})
-    
-                })
-                if(res.ok){
-                    setImgUrl("")
-                    setPublicId("")
-                }
-            } catch (error) {
-                console.log(error);
-                
+        e.preventDefault()
+        try {
+            const res=await fetch("/api/removeImage",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"aplication/json"
+                },
+                body:JSON.stringify({publicId})
+
+            })
+            if(res.ok){
+                setImgUrl("")
+                setPublicId("")
             }
-           
-    }
+        } catch (error) {
+            console.log(error);
+            
+        }
+       
+}
 
     const handleSubmit=async(e: React.FormEvent)=>{
         e.preventDefault() 
         
         if(!title || !content){
-           const errorMessage="Title and content are required"
-           toast.error(errorMessage)
+            toast.error("Title and content are required")
             return;
         }
 
         try {
-            const res=await fetch("api/posts/",{
-               method:"POST" ,
+            const res=await fetch(`/api/posts/${post.id}`,{
+               method:"PUT" ,
                headers:{
                 "Content-type":"aplication/json"
                },
@@ -106,7 +115,7 @@ export default function CreatePostForm()  {
             })
          
         if(res.ok){
-            toast.success("Post created successfully")
+            toast.success("Post updated successfully")
             router.push("/dashboard")
         }
         else{
@@ -119,10 +128,10 @@ export default function CreatePostForm()  {
     }
   return (
     <div>
-        <h4>Create Post</h4>
+        <h4>Edit Post</h4>
         <form onSubmit={handleSubmit} className="flex flex-col gap-2"> 
-            <input onChange={(e)=>setTitle(e.target.value)} type="text" placeholder='title' />
-            <textarea onChange={(e)=>setContent(e.target.value)}  placeholder='content'></textarea>
+            <input value={title} onChange={(e)=>setTitle(e.target.value)} type="text" placeholder='title' />
+            <textarea value={content} onChange={(e)=>setContent(e.target.value)}  placeholder='content'></textarea>
             {
                 links && links.map((link,i)=>(
                     <div key={i} className="flex gap-4 items-center">
@@ -190,7 +199,8 @@ export default function CreatePostForm()  {
                         </button>
                 )
             }
-            <select onChange={(e)=>setSelectedCategory(e.target.value)} className="p-4 rounded-md border appearance-none" >
+
+            <select value={selectedCategory} onChange={(e)=>setSelectedCategory(e.target.value)} className="p-4 rounded-md border appearance-none" >
                 <option value="">Select a category</option>
                 {
                     categories && 
@@ -200,8 +210,8 @@ export default function CreatePostForm()  {
                     
                 }
             </select>
-            <button type="submit" className="primary-btn">Create post</button>
-           
+            <button type="submit" className="primary-btn">Update post</button>
+            
             
         </form>
         </div>
