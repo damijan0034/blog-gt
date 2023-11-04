@@ -117,6 +117,7 @@ export default function EditPostForm({post}:{post:TPost})  {
         if(res.ok){
             toast.success("Post updated successfully")
             router.push("/dashboard")
+            router.refresh()
         }
         else{
             toast.error("Something went wrong")
