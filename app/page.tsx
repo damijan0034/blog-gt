@@ -27,13 +27,13 @@ export default async function Home() {
       <CategoriesList />
       {
         posts && posts.length > 0 ? (
-          posts.map((post)=> <Post
+          posts.map((post)=> {<Post
           key={post.id} id={post.id} author={post.author.name}
           authorEmail={post.authorEmail} date={post.createdAt}
           thumbnail={post.imgUrl} category={post.catName}
           title={post.title} content={post.content}
           links={post.links || []}
-          />)
+          />})
          
         ) : (
           <div className='py-5'>No posts to display</div>
